@@ -21,6 +21,11 @@ const test = `5	1	9	5
 7	5	3
 2	4	6	8`;
 
+const test2 = `5	9	2	8
+9	4	7	3
+3	8	6	5`;
+
+// Part 1
 const checksum = spreadsheet => {
     let array = spreadsheet.split('\n').map(row => row.split('\t').map(Number));
     return array
@@ -42,3 +47,25 @@ const checksum = spreadsheet => {
 
 assert.equal(checksum(test), 18);
 console.log(checksum(input));
+
+// Part 2
+const checksum2 = spreadsheet => {
+    let array = spreadsheet.split('\n').map(row => row.split('\t').map(Number));
+    return array
+        .map(row => {
+            let evenDiv;
+            // n^2 baby
+            row.forEach(value => {
+                row.forEach(value2 => {
+                    if (value % value2 === 0 && value !== value2) {
+                        evenDiv = value / value2;
+                    }
+                });
+            });
+            return evenDiv;
+        })
+        .reduce((sum, value) => sum + value);
+};
+
+assert.equal(checksum2(test2), 9);
+console.log(checksum2(input));
