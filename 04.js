@@ -516,6 +516,7 @@ huo esajup ouj oju ujo
 eeeu hwvsk jfkmds okhi pogskfm itdlbll
 lpyubo dylpfb iehwug decj ntidy cuygyg lalkb iutu oxgm imn`;
 
+// Part 1
 const validate = passphrase => {
     let words = passphrase.split(' ');
     let valid;
@@ -540,3 +541,28 @@ assert.equal(validate('aa bb cc dd aaa'), true);
 let passwords = input.split('\n');
 let validCount = passwords.filter(validate).length;
 console.log(validCount);
+
+// Part 2
+const validate2 = passphrase => {
+    let words = passphrase.split(' ');
+    words = words.map(word =>
+        word
+            .split('')
+            .sort()
+            .join('')
+    );
+    let valid;
+    words.forEach((word, index) => {
+        words.forEach((word2, index2) => {
+            if (word === word2 && index !== index2) {
+                valid = false;
+            }
+        });
+    });
+    if (valid === undefined) {
+        valid = true;
+    }
+    return valid;
+};
+let validCount2 = passwords.filter(validate2).length;
+console.log(validCount2);
