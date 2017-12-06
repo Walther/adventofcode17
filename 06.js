@@ -15,7 +15,7 @@ const distribute = array => {
             array[index] += 1;
         }
         // check whether we've been in this state before
-        let match = distributions.filter(state => state === array + '')[0];
+        let match = distributions[distributions.indexOf(array + '')];
         if (match) {
             console.log(JSON.stringify(match));
             let cycles = distributions.length - distributions.indexOf(match);
