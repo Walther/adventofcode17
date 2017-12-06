@@ -15,13 +15,17 @@ const distribute = array => {
             array[index] += 1;
         }
         // check whether we've been in this state before
-        if (distributions.filter(state => state === array + '').length > 0) {
-            return distributions.length + 1;
+        let match = distributions.filter(state => state === array + '')[0];
+        if (match) {
+            console.log(JSON.stringify(match));
+            let cycles = distributions.length - distributions.indexOf(match);
+            return [distributions.length + 1, cycles];
         } else {
             distributions.push(array + '');
         }
     }
 };
 
-assert.equal(distribute(test), 5);
+assert.deepEqual(distribute(test), [5, 4]);
+assert.deepEqual(distribute([1, 1]), [3, 2]);
 console.log(distribute(input));
