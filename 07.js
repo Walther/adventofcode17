@@ -42,17 +42,23 @@ const treeParser = input => {
         children: children.split(', ')
     }));
 
+    nodes = nodes.concat(leaves);
+
     // Find the root
     let reverseNodes = nodes
-        .map(node =>
-            node.children.map(child => ({
-                name: child,
-                parent: node.name
-            }))
-        )
+        .map(node => {
+            if (node.children) {
+                return node.children.map(child => ({
+                    name: child,
+                    parent: node.name
+                }));
+            } else {
+                return node;
+            }
+        })
         .reduce((a, b) => a.concat(b), []); // flatten
 
-    let root = reverseNodes
+    let rootName = reverseNodes
         .map(rNode => {
             let parents = reverseNodes.filter(n => n.name === rNode.parent);
             if (parents.length === 0) {
@@ -60,9 +66,81 @@ const treeParser = input => {
             }
         })
         .filter(n => n)[0]; // remove undefineds, get the name
-    return root;
+    let root = nodes.filter(node => node.name === rootName)[0];
+
+    // Build the tree
+    const buildTree = node => {
+        //console.log(node);
+        if (node.children) {
+            return {
+                ...node,
+                children: node.children.map(child => {
+                    let newChild = nodes.filter(node => node.name === child)[0];
+                    return buildTree(newChild);
+                })
+            };
+        } else {
+            return node;
+        }
+    };
+    let tree = buildTree(root);
+
+    // Traverse the tree and compute weight sums
+    const weighTree = node => {
+        if (node.children) {
+            let children = node.children.map(weighTree);
+            return {
+                ...node,
+                children,
+                sum:
+                    children.reduce((a, b) => ({ sum: a.sum + b.sum })).sum +
+                    node.value
+            };
+        } else {
+            return {
+                ...node,
+                sum: node.value
+            };
+        }
+    };
+    let weighted = weighTree(tree);
+
+    // Find the deepest unbalanced node
+    const findBalance = node => {
+        // Find the differing child
+        if (node.children) {
+            node.children.sort((a, b) => a.sum - b.sum);
+            let reference = node.children[1].sum; // Differing will be either smallest or biggest, rest will be same
+            let differing;
+            if (node.children[0].sum !== reference) {
+                differing = node.children[0];
+            } else if (
+                node.children[node.children.length - 1].sum !== reference
+            ) {
+                differing = node.children[node.children.length - 1];
+            } else {
+                return -1; // Stable up here
+            }
+            // ---
+            let recurse = findBalance(differing);
+            if (recurse === -1) {
+                // If the children are balanced, we're at the tipping point
+                // Calculate and return the correct weight
+                let balance = differing.value + reference - differing.sum;
+                return balance;
+            } else {
+                // Else, continue recursing
+                return recurse;
+            }
+        } else {
+            return -1; // If we end up at leaves, tipping point is below us
+        }
+    };
+    let balance = findBalance(weighted);
+
+    return [rootName, balance];
 };
-assert.equal(treeParser(test), 'tknk');
+assert.deepEqual(treeParser(test), ['tknk', 60]);
 
 const input = `bqyqwn (68) -> wscqe, cwxspl, syogw, xnxudsh
 ddswb (34)
