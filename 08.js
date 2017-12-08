@@ -7,7 +7,8 @@ c inc -20 if c == 10`;
 
 const compute = input => {
     let rows = input.split('\n');
-    let registers = [];
+    let registers = {};
+    let max = 0;
     // Initialize vars to 0
     rows.map(row => {
         // Oh boy! This is dangerous.
@@ -16,7 +17,7 @@ const compute = input => {
         // In this case, for a small puzzle, with fixed input,
         // it's just how it should be done.
         let registerName = row.split(' ')[0];
-        registers.push(registerName);
+        eval('registers.' + registerName + '=' + 0);
         eval(registerName + '=0');
     });
     //Compute the values
@@ -36,16 +37,20 @@ const compute = input => {
         let number = operation[2];
         if (eval(condition)) {
             eval(register + operator + number);
+            let newValue = eval(register);
+            if (newValue > max) {
+                max = newValue;
+            }
+            eval('registers.' + register + '=' + newValue);
         }
     });
     // Return the maximum value
-    let values = registers.map(register => {
-        return eval(register);
-    });
-    return values.reduce((a, b) => Math.max(a, b));
+    let values = Object.values(registers);
+    let endMax = values.reduce((a, b) => Math.max(a, b));
+    return [endMax, max];
 };
 
-assert.equal(compute(test), 1);
+assert.deepEqual(compute(test), [1, 10]);
 
 let input = `hwv inc 149 if clj >= -5
 or inc 530 if hwv > 144
