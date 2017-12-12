@@ -22,12 +22,16 @@ const pipes = input => {
       .map(Number);
     return { key: key, connections };
   });
-  let zero = array.find(obj => obj.key === 0);
   // Breadth-first search
-  let neighbours = new Set();
-  bfs(array, neighbours, zero);
-  neighbours = Array.from(neighbours); // Convert to array
-  return neighbours.length;
+  let neighbourlist = [];
+  for (index = 0; index < array.length; index++) {
+    let neighbours = new Set();
+    let startNode = array.find(obj => obj.key === index);
+    bfs(array, neighbours, startNode);
+    neighbourlist.push(Array.from(neighbours));
+  }
+  let neighbourSet = new Set(neighbourlist.map(list => list.sort().toString()));
+  return [neighbourlist[0].length, neighbourSet.size];
 };
 
 const test = `0 <-> 2
@@ -38,7 +42,7 @@ const test = `0 <-> 2
 5 <-> 6
 6 <-> 4, 5`;
 
-assert.equal(pipes(test), 6);
+assert.deepEqual(pipes(test), [6, 2]);
 
 const input = `0 <-> 199, 1774
 1 <-> 350, 1328, 1920
