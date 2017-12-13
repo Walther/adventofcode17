@@ -9,24 +9,21 @@ const firewallWalk = (input, delay) => {
     depths[keyVal[0]] = keyVal[1];
   });
   // Initialize guards
-  let guards = depths.map(range => {
-    // With delay 0, position should be 0
-    // With delay 1, position should be 1
-    // With bigger delays, position should be a triangle wave function of the range
-    let position = (delay + range - 1) % (2 * (range - 1)) - (range - 1);
-    let direction;
-    if (position < 0) {
-      direction = "up";
-    } else {
-      direction = "down";
-    }
-    position = Math.abs(position);
-    return {
-      position,
-      range,
-      direction
-    };
-  });
+  let updateGuards = currentTime => {
+    return depths.map(range => {
+      // With delay 0, position should be 0
+      // With delay 1, position should be 1
+      // With bigger delays, position should be a triangle wave function of the range
+      let position =
+        Math.abs(currentTime + delay + range - 1) % (2 * (range - 1)) -
+        (range - 1);
+      return {
+        position,
+        range
+      };
+    });
+  };
+  let guards = updateGuards(0);
   // Walk through the firewall
   let severity = 0;
   let caught = false;
@@ -42,25 +39,7 @@ const firewallWalk = (input, delay) => {
       severity += packetPosition * depths[packetPosition];
     }
     // Update guard positions
-    guards.forEach(guard => {
-      if (guard !== null) {
-        if (guard.direction === "down") {
-          if (guard.position === guard.range - 1) {
-            guard.direction = "up";
-            guard.position--;
-          } else {
-            guard.position++;
-          }
-        } else if (guard.direction === "up") {
-          if (guard.position === 0) {
-            guard.direction = "down";
-            guard.position++;
-          } else {
-            guard.position--;
-          }
-        }
-      }
-    });
+    guards = updateGuards(packetPosition + 1);
     //console.log(JSON.stringify(guards, null, 2));
   }
   return [severity, caught];
