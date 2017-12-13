@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-const firewallWalk = (depths, delay) => {
+const firewallWalk = (depths, delay, terminateOnCaught = false) => {
   // Initialize guards
   let getCaught = time => {
     // Packet position = time, because we move one layer per unit time
@@ -29,6 +29,10 @@ const firewallWalk = (depths, delay) => {
   ) {
     if (getCaught(packetPosition)) {
       caught = true;
+      // Optimization for part2
+      if (terminateOnCaught) {
+        return [-1, true];
+      }
       severity += packetPosition * depths[packetPosition];
     }
   }
@@ -54,7 +58,7 @@ const part2 = input => {
   let delay = 0;
   let depths = inputToDepths(input);
   while (true) {
-    let caught = firewallWalk(depths, delay)[1];
+    let caught = firewallWalk(depths, delay, true)[1];
     if (!caught) {
       return delay;
       break;
