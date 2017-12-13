@@ -9,21 +9,21 @@ const firewallWalk = (input, delay) => {
     depths[keyVal[0]] = keyVal[1];
   });
   // Initialize guards
-  let updateGuards = currentTime => {
-    return depths.map(range => {
-      // With delay 0, position should be 0
-      // With delay 1, position should be 1
-      // With bigger delays, position should be a triangle wave function of the range
-      let position =
-        Math.abs(currentTime + delay + range - 1) % (2 * (range - 1)) -
-        (range - 1);
-      return {
-        position,
-        range
-      };
-    });
+  let getCaught = packetPosition => {
+    let range = depths[packetPosition]; // the range of the guard at the level
+    if (!range) {
+      return false;
+    } else
+      return (
+        // Complicated math here.
+        // Position is initially 0, and then triangle wave constrained to range
+        // packetPosition works here as an additional measure of time, as its movement takes
+        // one unit time per layer too
+        Math.abs(packetPosition + delay + range - 1) % (2 * (range - 1)) -
+          (range - 1) ===
+        0
+      );
   };
-  let guards = updateGuards(0);
   // Walk through the firewall
   let severity = 0;
   let caught = false;
@@ -32,15 +32,10 @@ const firewallWalk = (input, delay) => {
     packetPosition < depths.length;
     packetPosition++
   ) {
-    currentGuard = guards[packetPosition];
-    if (currentGuard && currentGuard.position === 0) {
-      // The packet is always moving on the topmost layer
+    if (getCaught(packetPosition)) {
       caught = true;
       severity += packetPosition * depths[packetPosition];
     }
-    // Update guard positions
-    guards = updateGuards(packetPosition + 1);
-    //console.log(JSON.stringify(guards, null, 2));
   }
   return [severity, caught];
 };
