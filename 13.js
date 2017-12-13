@@ -1,37 +1,48 @@
 const assert = require("assert");
 
-const firewallWalk = input => {
+const firewallWalk = (input, delay) => {
   // String processing
   let array = input.split("\n");
-  let firewall = [];
+  let depths = [];
   array.forEach(row => {
     let keyVal = row.split(": ").map(Number);
-    firewall[keyVal[0]] = keyVal[1];
+    depths[keyVal[0]] = keyVal[1];
   });
   // Initialize guards
-  let depths = firewall.map(layer => layer);
-  let guards = depths.map((range, layer) => {
+  let guards = depths.map(range => {
+    // With delay 0, position should be 0
+    // With delay 1, position should be 1
+    // With bigger delays, position should be a triangle wave function of the range
+    let position = (delay + range - 1) % (2 * (range - 1)) - (range - 1);
+    let direction;
+    if (position < 0) {
+      direction = "up";
+    } else {
+      direction = "down";
+    }
+    position = Math.abs(position);
     return {
-      layer,
-      position: 0,
+      position,
       range,
-      direction: "down"
+      direction
     };
   });
   // Walk through the firewall
   let severity = 0;
+  let caught = false;
   for (
     let packetPosition = 0;
-    packetPosition < firewall.length;
+    packetPosition < depths.length;
     packetPosition++
   ) {
     currentGuard = guards[packetPosition];
     if (currentGuard && currentGuard.position === 0) {
       // The packet is always moving on the topmost layer
+      caught = true;
       severity += packetPosition * depths[packetPosition];
     }
     // Update guard positions
-    guards.forEach((guard, layer) => {
+    guards.forEach(guard => {
       if (guard !== null) {
         if (guard.direction === "down") {
           if (guard.position === guard.range - 1) {
@@ -50,8 +61,30 @@ const firewallWalk = input => {
         }
       }
     });
+    //console.log(JSON.stringify(guards, null, 2));
   }
-  return severity;
+  return [severity, caught];
+};
+
+const part1 = input => {
+  return firewallWalk(input, 0)[0];
+};
+
+const part2 = input => {
+  let delay = 0;
+  while (true) {
+    if (delay !== 0 && delay % 10000 === 0) {
+      // For measuring speed
+      console.log("delay: " + delay);
+    }
+    let caught = firewallWalk(input, delay)[1];
+    if (!caught) {
+      return delay;
+      break;
+    } else {
+      delay++;
+    }
+  }
 };
 
 const test = `0: 3
@@ -59,7 +92,8 @@ const test = `0: 3
 4: 4
 6: 4`;
 
-assert.equal(firewallWalk(test), 24);
+assert.equal(part1(test), 24);
+assert.equal(part2(test), 10);
 
 const input = `0: 5
 1: 2
@@ -105,4 +139,5 @@ const input = `0: 5
 90: 18
 92: 17`;
 
-console.log(firewallWalk(input));
+console.log(part1(input));
+console.log(part2(input));
