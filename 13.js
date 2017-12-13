@@ -1,27 +1,22 @@
 const assert = require("assert");
 
-const firewallWalk = (input, delay) => {
-  // String processing
-  let array = input.split("\n");
-  let depths = [];
-  array.forEach(row => {
-    let keyVal = row.split(": ").map(Number);
-    depths[keyVal[0]] = keyVal[1];
-  });
+const firewallWalk = (depths, delay) => {
   // Initialize guards
-  let getCaught = packetPosition => {
-    let range = depths[packetPosition]; // the range of the guard at the level
+  let getCaught = time => {
+    // Packet position = time, because we move one layer per unit time
+    let range = depths[time]; // the range of the guard at the level
     if (!range) {
-      return false;
+      return false; // No guard here
     } else
       return (
-        // Complicated math here.
-        // Position is initially 0, and then triangle wave constrained to range
-        // packetPosition works here as an additional measure of time, as its movement takes
-        // one unit time per layer too
-        Math.abs(packetPosition + delay + range - 1) % (2 * (range - 1)) -
-          (range - 1) ===
-        0
+        // if range is null or 0, there's no guard
+        // if range is 1, it's always there
+        // if range is 2, it'll be there every second tick
+        // if range is 3, it'll be there every 4th tick
+        // if range is 4, it'll be there every 6th
+        // if range is 5, it'll be there every 8th
+        // if range is 6, it'll be there every 10th
+        (time + delay) % (2 * (range - 1)) === 0
       );
   };
   // Walk through the firewall
@@ -40,18 +35,27 @@ const firewallWalk = (input, delay) => {
   return [severity, caught];
 };
 
+const inputToDepths = input => {
+  // String processing
+  let array = input.split("\n");
+  let depths = [];
+  array.forEach(row => {
+    let keyVal = row.split(": ").map(Number);
+    depths[keyVal[0]] = keyVal[1];
+  });
+  return depths;
+};
+
 const part1 = input => {
-  return firewallWalk(input, 0)[0];
+  let depths = inputToDepths(input);
+  return firewallWalk(depths, 0)[0];
 };
 
 const part2 = input => {
   let delay = 0;
+  let depths = inputToDepths(input);
   while (true) {
-    if (delay !== 0 && delay % 10000 === 0) {
-      // For measuring speed
-      console.log("delay: " + delay);
-    }
-    let caught = firewallWalk(input, delay)[1];
+    let caught = firewallWalk(depths, delay)[1];
     if (!caught) {
       return delay;
       break;
