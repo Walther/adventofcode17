@@ -37,9 +37,8 @@ const firewallWalk = (depths, delay) => {
 
 const inputToDepths = input => {
   // String processing
-  let array = input.split("\n");
   let depths = [];
-  array.forEach(row => {
+  input.split("\n").forEach(row => {
     let keyVal = row.split(": ").map(Number);
     depths[keyVal[0]] = keyVal[1];
   });
