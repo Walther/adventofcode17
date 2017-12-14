@@ -55,30 +55,70 @@ const knotHash = string => {
 
 assert.equal(knotHash("AoC 2017"), "33efeb34ea91902bb2f59c9920caa6cd");
 
+const dfs = (input, x, y, visited) => {
+  if (
+    x < 0 ||
+    y < 0 ||
+    x > input[0].length - 1 ||
+    y > input.length - 1 ||
+    visited[x][y] === 1 ||
+    input[x][y] === 0
+  ) {
+    try {
+      visited[x][y] = 1;
+    } catch (e) {}
+    return visited;
+  } else {
+    visited[x][y] = 1;
+    visited = dfs(input, x, y - 1, visited); //north
+    visited = dfs(input, x + 1, y, visited); //east
+    visited = dfs(input, x, y + 1, visited); //south
+    visited = dfs(input, x - 1, y, visited); //west
+    return visited;
+  }
+};
+
+const countRegions = input => {
+  let islands = 0;
+  let visited = input.map(row => new Array(input.length).fill(0));
+  for (let x = 0; x < input[0].length; x++) {
+    for (let y = 0; y < input.length; y++) {
+      if (input[x][y] === 1 && visited[x][y] === 0) {
+        visited = dfs(input, x, y, visited);
+        islands++;
+      } else {
+        visited[x][y] = 1;
+      }
+    }
+  }
+  return islands;
+};
+
 const defragment = input => {
   let rows = [];
   for (let i = 0; i < 128; i++) {
     rows.push(input + "-" + i);
   }
   let hashes = rows.map(knotHash);
-  let used = hashes
-    .map(row =>
-      row
-        .split("")
-        .map(byte =>
-          parseInt(byte, 16)
-            .toString(2)
-            .padStart(4, "0000")
-        )
-        .join("")
-        .split("")
-        .map(Number)
-        .reduce((a, b) => a + b)
-    )
-    .reduce((a, b) => a + b);
-
-  return used;
+  let usedBits = hashes.map(row =>
+    row
+      .split("")
+      .map(byte =>
+        parseInt(byte, 16)
+          .toString(2)
+          .padStart(4, "0000")
+      )
+      .join("")
+      .split("")
+      .map(Number)
+  );
+  let sum = [].concat
+    .apply([], usedBits) // flatten
+    .reduce((a, b) => a + b); // sum
+  let regions;
+  regions = countRegions(usedBits);
+  return [sum, regions];
 };
 
-assert.equal(defragment("flqrgnkx"), 8108);
+assert.deepEqual(defragment("flqrgnkx"), [8108, 1242]);
 console.log(defragment("hfdlxzhv"));
