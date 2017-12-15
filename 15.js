@@ -8,11 +8,15 @@ const genB = input => {
   return (input * 48271) % 2147483647;
 };
 
-const byteify = input => {
-  return input
-    .toString(2)
-    .padStart(32, "00000000000000000000000000000000")
-    .slice(16, 33);
+const compare16bit = (a, b) => {
+  return (
+    Number(
+      (a | b)
+        .toString(2)
+        .padStart(32, "00000000000000000000000000000000")
+        .slice(16, 33)
+    ) === 0
+  );
 };
 
 const part1 = input => {
@@ -22,7 +26,7 @@ const part1 = input => {
   for (let i = 0; i < 40e6; i++) {
     valueA = genA(valueA);
     valueB = genB(valueB);
-    if (byteify(valueA) === byteify(valueB)) {
+    if (compare16bit(valueA, valueB)) {
       judge++;
     }
   }
@@ -40,7 +44,7 @@ const part2 = input => {
     do {
       valueB = genB(valueB);
     } while (valueB % 8 !== 0);
-    if (byteify(valueA) === byteify(valueB)) {
+    if (compare16bit(valueA, valueB)) {
       judge++;
     }
   }
