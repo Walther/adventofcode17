@@ -26,7 +26,6 @@ const part1 = input => {
       judge++;
     }
   }
-  console.log(judge);
   return judge;
 };
 
