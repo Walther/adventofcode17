@@ -51,6 +51,9 @@ assert.equal(genA(65), 1092455);
 assert.equal(genA(1092455), 1181022009);
 assert.equal(genB(8921), 430625591);
 assert.equal(genB(430625591), 1233683848);
+assert.equal(byteify(1), "0000000000000001");
+assert.equal(byteify(0), "0000000000000000");
+assert.equal(byteify(2), "0000000000000010");
 
 const input = [679, 771];
 const test = [65, 8921];
