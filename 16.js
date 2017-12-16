@@ -88,38 +88,22 @@ assert.equal(
   "baedc"
 );
 
-/*
-// An attempt at analysing the transformation and then reapplying it
-// Sadly, this won't work, as there are operations which swap letters by their names,
-// not only based on indices
-
-let analyseDance = programs => {
-  // Given an input of the end state of a program after a dance
-  // Return the new index of each letter
-  // This gives it easy repeatability
-  return getPrograms(programs.length).map(letter => programs.indexOf(letter));
-};
-
-assert.deepEqual(analyseDance(["a", "b"]), [0, 1]);
-assert.deepEqual(analyseDance(["b", "a"]), [1, 0]);
-assert.deepEqual(analyseDance(["b", "a", "c"]), [1, 0, 2]);
-
-let quickDance = (programs, analysis) => {
-  let newPrograms = new Array(programs.length);
-  programs.forEach((letter, index) => (newPrograms[analysis[index]] = letter));
-  return newPrograms;
-};
-
-assert.deepEqual(quickDance(["a", "b"], [1, 0]), ["b", "a"]);
-assert.deepEqual(quickDance(["b", "a", "c"], [1, 0, 2]), ["a", "b", "c"]);
-
-
-*/
-
 const part2 = (input, programs, iterations) => {
+  let history = [];
   for (let iter = 0; iter < iterations; iter++) {
     programs = dance(input, programs);
+    // Look for a loop
+    let match = history.find(
+      historyPrograms => historyPrograms.toString() === programs.toString()
+    );
+    if (match) {
+      // Use the loop
+      let afterCycles = history[1e9 % history.length - 1].split(",");
+      return afterCycles;
+    }
+    history.push(programs.toString());
   }
+
   return programs;
 };
 
