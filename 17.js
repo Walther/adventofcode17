@@ -14,4 +14,20 @@ const spinlock = step => {
 };
 
 assert.equal(spinlock(test), 638);
-console.log(spinlock(input));
+
+const spinlock2 = step => {
+  let arrayLength = 1; // initial list with just zero as the sole element
+  let currentPos = 0;
+  let value;
+  for (let i = 1; i <= 50e6; i++) {
+    currentPos = (step + currentPos) % arrayLength;
+    if (currentPos === 0) {
+      value = i;
+    }
+    currentPos++;
+    arrayLength++;
+  }
+  return value;
+};
+
+console.log([spinlock(input), spinlock2(input)]);
